@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS quota (
+    tenant VARCHAR(64) PRIMARY KEY,
+    used INTEGER NOT NULL CHECK (used >= 0)
+);

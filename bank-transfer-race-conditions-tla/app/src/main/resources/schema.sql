@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS account (
+    id BIGINT PRIMARY KEY,
+    owner VARCHAR(64) NOT NULL,
+    balance BIGINT NOT NULL
+);
