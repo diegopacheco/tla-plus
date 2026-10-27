@@ -1,9 +1,11 @@
 package com.github.diegopacheco.bank.transfer;
 
 import com.github.diegopacheco.bank.account.AccountRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +27,19 @@ class SafeTransferServiceTest {
     @Autowired
     private AccountRepository accounts;
 
+    @Autowired
+    private JdbcClient jdbc;
+
+    private TestAccounts ids;
+
+    @AfterEach
+    void closeAccounts() {
+        ids.close(jdbc);
+    }
+
     @Test
     void sameTransfersAsTheTlcModelNeverOverdraftNorLoseMoney() throws Exception {
-        TestAccounts ids = TestAccounts.open(accounts);
+        ids = TestAccounts.open(accounts);
         List<Transfer> transfers = List.of(
                 new Transfer(ids.alice(), ids.bob(), 60),
                 new Transfer(ids.alice(), ids.bob(), 60),
@@ -51,7 +63,7 @@ class SafeTransferServiceTest {
 
     @Test
     void oppositeDirectionStressNeverDeadlocksOverdraftsOrLosesMoney() throws Exception {
-        TestAccounts ids = TestAccounts.open(accounts);
+        ids = TestAccounts.open(accounts);
         List<Transfer> transfers = new ArrayList<>();
         for (int i = 0; i < 300; i++) {
             transfers.add(i % 2 == 0

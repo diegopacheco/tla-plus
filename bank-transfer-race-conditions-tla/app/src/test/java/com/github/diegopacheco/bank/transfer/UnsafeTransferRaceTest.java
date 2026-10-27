@@ -1,9 +1,11 @@
 package com.github.diegopacheco.bank.transfer;
 
 import com.github.diegopacheco.bank.account.AccountRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.simple.JdbcClient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,9 +19,19 @@ class UnsafeTransferRaceTest {
     @Autowired
     private AccountRepository accounts;
 
+    @Autowired
+    private JdbcClient jdbc;
+
+    private TestAccounts ids;
+
+    @AfterEach
+    void closeAccounts() {
+        ids.close(jdbc);
+    }
+
     @Test
     void tlcOverdraftTraceCheckCheckDebitDebitLeavesAliceNegative() {
-        TestAccounts ids = TestAccounts.open(accounts);
+        ids = TestAccounts.open(accounts);
         Transfer t1 = new Transfer(ids.alice(), ids.bob(), 60);
         Transfer t2 = new Transfer(ids.alice(), ids.bob(), 60);
 
@@ -33,7 +45,7 @@ class UnsafeTransferRaceTest {
 
     @Test
     void tlcLostUpdateTraceCreatesMoneyOutOfThinAir() {
-        TestAccounts ids = TestAccounts.open(accounts);
+        ids = TestAccounts.open(accounts);
         Transfer t1 = new Transfer(ids.alice(), ids.bob(), 60);
         Transfer t3 = new Transfer(ids.bob(), ids.alice(), 30);
 

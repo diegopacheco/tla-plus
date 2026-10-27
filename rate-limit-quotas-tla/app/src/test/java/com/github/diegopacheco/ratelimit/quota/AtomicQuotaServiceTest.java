@@ -1,8 +1,10 @@
 package com.github.diegopacheco.ratelimit.quota;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.simple.JdbcClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +24,18 @@ class AtomicQuotaServiceTest {
     @Autowired
     private AtomicQuotaService service;
 
+    @Autowired
+    private JdbcClient jdbc;
+
+    private final String tenant = UUID.randomUUID().toString();
+
+    @AfterEach
+    void deleteTenant() {
+        jdbc.sql("DELETE FROM quota WHERE tenant = :tenant").param("tenant", tenant).update();
+    }
+
     @Test
     void concurrentNodesNeverGrantMoreThanTheQuota() throws Exception {
-        String tenant = UUID.randomUUID().toString();
         int requests = 200;
         CountDownLatch start = new CountDownLatch(1);
         List<Future<Boolean>> results = new ArrayList<>();
@@ -48,7 +59,6 @@ class AtomicQuotaServiceTest {
 
     @Test
     void windowResetGivesTheTenantAFreshQuota() {
-        String tenant = UUID.randomUUID().toString();
         for (int i = 0; i < 10; i++) {
             assertTrue(service.consume(tenant));
         }
