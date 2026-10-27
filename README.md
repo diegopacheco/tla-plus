@@ -53,3 +53,8 @@ all interleavings of the model, so a bug that needs 7 precise steps is found in 
 * [bank-transfer-race-conditions-tla](bank-transfer-race-conditions-tla/README.md)
   Models concurrent money transfers, and TLC finds an overdraft, a lost update and a deadlock.
   The fix locks both accounts in id order inside one transaction, verified by TLC and by stress tests.
+
+## Tooling
+
+* [TLA+ for VS Code](https://marketplace.visualstudio.com/items?itemName=tlaplus.vscode-ide) (`tlaplus.vscode-ide`)
+  The official TLA+ extension: syntax highlighting, parsing, and running TLC on a `.tla` spec with its `.cfg` straight from the editor.
